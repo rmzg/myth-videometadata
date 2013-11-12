@@ -196,9 +196,8 @@ for my $top_dir ( @ARGV ) {
 					contenttype => 'TELEVISION',
 				});
 
+				sleep(0.7);
 			}
-
-			sleep(0.7);
 		}
 
 		# If we've reached here we want to skip metadata and insert plain files.
