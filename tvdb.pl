@@ -7,9 +7,9 @@ use WebService::TVDB;
 
 my $tvdb = WebService::TVDB->new( api_key => 'BA564A54BE1EA624', language => 'English', max_retries => '10' );
 
-my $series = $tvdb->search('archer');
+my $series = $tvdb->search('QI');
 
-my $s = $series->[2];
+my $s = $series->[0];
 
 $s->fetch;
 

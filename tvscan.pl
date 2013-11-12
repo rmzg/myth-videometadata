@@ -157,8 +157,6 @@ for my $top_dir ( @ARGV ) {
 				print "\tEpisode: ", $episode->EpisodeName, " ${sn}x$en -- $file\n";
 				print "\t\t Myth Path: [$myth_relative_path]\n";
 
-			sleep(0.5); next;
-
 				insert_show({
 					title => $episode->EpisodeName,
 					subtitle => $series->SeriesName,
@@ -342,7 +340,6 @@ sub check_for_new_files {
 my( $insert_sth, $delete_sth );
 sub insert_show {
 	my( $info ) = @_;
-	return;
 
 	# Prepare our statements once.
 	# Do it inside the sub to make sure they're set when the sub is called...
@@ -385,8 +382,23 @@ sub insert_show {
 
 	$delete_sth ||= $dbh->prepare( "DELETE FROM videometadata WHERE filename = ?" );
 
+	unless( defined $info->{filename} and length $info->{filename} ) { 
+		warn "TERRIBLE INSERT: [$info->{title}]! Missing filename!";
+		return;
+	}
+
 	# If we've been called we want to make sure we're not duplicating data in the database so we remove the existing filename record.
 	$delete_sth->execute( $info->{filename} );
+
+	# Check for invalid undefs!
+	for( keys %$info ) {
+
+		next if $_ eq 'playcommand'; #Ugly hack to leave 'playcommand' as undef if its set that way.
+		                             # I don't know if its just as happy with an empty string as undef, but this works..
+
+		# The table is much happier with blank strings instead of undefs
+		if( not defined $info->{$_} ) { $info->{$_} = '' } 
+	}
 
 	$insert_sth->execute( 
 		$info->{title},
@@ -458,7 +470,7 @@ sub _get_store_image {
 	my $resp = $ua->get( $abs_url );
 
 	if( $resp->is_success ) {
-		_mkdir $sub_dir;
+		_mkdir( $sub_dir );
 
 		open my $fh, ">", $store_path or die "Failed to open [$store_path]: $!\n";
 		print $fh $resp->content;
@@ -490,7 +502,7 @@ sub get_coverfile {
 	my( $series, $sn ) = @_;
 
 
-	my @season_files = grep { $_->BannerType eq 'season' } $series->banners;
+	my @season_files = grep { $_->BannerType eq 'season' } @{$series->banners};
 
 	return "" unless @season_files;
 
@@ -508,22 +520,24 @@ sub get_coverfile {
 sub get_screenshot {
 	my( $episode ) = @_;
 
-	return get_store_image( $episode->filename, "screenshots" );
+	return _get_store_image( $episode->filename, "screenshots" );
 }
 
 sub get_banner {
 	my( $series ) = @_;
 
-	my( $file ) = map { $_->BannerPath } sort { $b->Rating <=> $a->Rating } grep { $_->BannerType eq 'series' } $series->banners;
+	                                            # Fix undef warnings with no ratings..
+	my( $file ) = map { $_->BannerPath } sort { ( $b->Rating // 0 ) <=> ( $a->Rating // 0 ) } grep { $_->BannerType eq 'series' } @{$series->banners};
 
-	return get_store_image( $file, "banners" );
+	return _get_store_image( $file, "banners" );
 }
 
 sub get_fanart {
 	my( $series ) = @_;
 
-	my( $file ) = map { $_->BannerPath } sort { $b->Rating <=> $a->Rating } grep { $_->BannerType eq 'fanart' } $series->banners;
+	                                            # Fix undef warnings with no ratings..
+	my( $file ) = map { $_->BannerPath } sort { ( $b->Rating // 0 ) <=> ( $a->Rating // 0 ) } grep { $_->BannerType eq 'fanart' } @{$series->banners};
 
-	return get_store_image( $file, "fanart" );
+	return _get_store_image( $file, "fanart" );
 }
 #-------------------------
