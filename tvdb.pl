@@ -13,7 +13,8 @@ my $s = $series->[2];
 
 $s->fetch;
 
-print $s->fanart;
+#use Data::Dumper;
+#print Dumper $s->banners;
 
 use Data::Dumper;
 print Dumper $s;

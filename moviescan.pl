@@ -300,10 +300,12 @@ sub get_art {
 		my $image_url = "$configuration->{images}->{base_url}original$_->{file_path}";
 		$path =~ s{^/}{};
 
+		my $fn = "$mythtype/$path";
+		return $path if -f $fn;
+
 		my $resp = $ua->get( $image_url );
 
 		if( $resp->is_success ) {
-			my $fn = "$mythtype/$path";
 			open my $fh, ">", $fn or die "Failed to open [$fn]: $!\n";
 			print $fh $resp->content;
 			return $path;
