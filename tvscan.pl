@@ -70,6 +70,7 @@ for my $top_dir ( @ARGV ) {
 		print "Found [$series_dir]\n";
 
 		# Skip this series unless we found files inside it that aren't in the database
+		#TODO Fix this!
 		next unless check_for_new_files( $top_dir, $series_dir );
 
 		my $cwd = "$top_dir/$series_dir";
@@ -117,6 +118,10 @@ for my $top_dir ( @ARGV ) {
 
 			print "Series: ", $series->SeriesName, " -- ", $series->seriesid, "\n";
 
+			# Add a folder image so mythtv displays something!
+			store_folder_image( $cwd, $series );
+
+			# Attempt to find files matching the episodes in the series.
 			for my $episode ( @{ $series->episodes } ) {
 
 				# Default to regular Season/Episode numbers
@@ -199,6 +204,7 @@ for my $top_dir ( @ARGV ) {
 				sleep(0.7);
 			}
 		}
+		# End of the series metadata scan
 
 		# If we've reached here we want to skip metadata and insert plain files.
 		else {
@@ -511,7 +517,7 @@ sub get_coverfile {
 	if( not @files ) { @files = @season_files }
 
 	# Find the 'best' file by rating.
-	my( $best_file ) = map { $_->BannerPath } sort { $b->Rating <=> $a->Rating } @files;
+	my( $best_file ) = map { $_->BannerPath } sort { ( $b->Rating // 0 ) <=> ( $a->Rating // 0 ) } @files;
 
 	return _get_store_image( $best_file, "coverart" );
 }
@@ -540,3 +546,9 @@ sub get_fanart {
 	return _get_store_image( $file, "fanart" );
 }
 #-------------------------
+
+sub store_folder_image {
+	my( $abs_dir, $series ) = @_;
+
+	my @banners = grep { $_->BannerType eq 'poster' } @{$series->banners};
+}
