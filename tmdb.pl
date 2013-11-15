@@ -16,12 +16,12 @@ my $mdb = WWW::TheMovieDB->new({
 
 use Data::Dumper;
 
-#print Dumper( Mojo::JSON->new()->decode( $mdb->Search::movie({ query => "$ARGV[0]", search_type => "phrase" }) ) ) ;
+print Dumper( Mojo::JSON->new()->decode( $mdb->Search::movie({ query => "scary movie", year => '2013', search_type => "phrase" }) ) ) ;
 #print "\n\n";
 
 my $j=Mojo::JSON->new;
 
-print Dumper $j->decode( $mdb->Configuration::configuration() );
+#print Dumper $j->decode( $mdb->Configuration::configuration() );
 
 #print Dumper $j->decode( $mdb->Movies::info({movie_id=>11072}));
 #print Dumper $j->decode( $mdb->Movies::images({movie_id=>11072}));

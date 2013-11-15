@@ -35,7 +35,11 @@ my $dbh = DBI->connect( "dbi:mysql:mythconverg","mythtv","mythtv" ) or die $!;
 my @file_exts = qw/mkv avi mp4 mpg mpeg ts mov wmv divx flv rmvb mpe mpa mp2 m2a qt rm 3gp ogm bin dvr gom gvi h264 hdmov hdv hkm mp4v mpeg1 mpeg4 ogv ogx tivo wtv/;
 	my $file_ext_regex = join '|', @file_exts;
 
-my $configuration = decode_json $mdb->Configuration::configuration();
+#TODO Sometimes the service returns 503 xml based error strings instead of actual data
+# If this happens repeatedly we should script a way to deal with it.. sleep $x seconds and retry.
+sub get_json;
+
+my $configuration = get_json $mdb->Configuration::configuration();
 
 #TODO Option parsing
 
@@ -67,7 +71,7 @@ for my $top_dir ( @ARGV ) {
 			next;
 		}
 
-		my $search = decode_json $mdb->Search::movie({ query => $title, language => 'en', year => $year, search_type => 'phrase' });
+		my $search = get_json $mdb->Search::movie({ query => $title, language => 'en', year => $year, search_type => 'phrase' });
 		if( $search->{total_results} < 1 ) {
 			warn "Failed to find a match for [$title]!\n";
 			next;
@@ -77,11 +81,11 @@ for my $top_dir ( @ARGV ) {
 		# If this isn't sufficient we can scan through results looking for titles that match or prompt the user.
 		my $id = $search->{results}->[0]->{id};
 
-		my $info =     decode_json $mdb->Movies::info({ movie_id => $id });
-		my $images =   decode_json $mdb->Movies::images({ movie_id => $id });
-		my $trailers = decode_json $mdb->Movies::trailers({ movie_id => $id });
-		my $credits  = decode_json $mdb->Movies::casts({ movie_id => $id }); #Used mostly for Director so far..
-		my $releases = decode_json $mdb->Movies::releases({ movie_id => $id }); #Used for MPAA Content Rating!
+		my $info =     get_json $mdb->Movies::info({ movie_id => $id });
+		my $images =   get_json $mdb->Movies::images({ movie_id => $id });
+		my $trailers = get_json $mdb->Movies::trailers({ movie_id => $id });
+		my $credits  = get_json $mdb->Movies::casts({ movie_id => $id }); #Used mostly for Director so far..
+		my $releases = get_json $mdb->Movies::releases({ movie_id => $id }); #Used for MPAA Content Rating!
 
 		insert_movie({
 			title => $info->{title},
@@ -313,4 +317,15 @@ sub get_art {
 	}
 
 	return '';
+}
+
+sub get_json {
+	my( $string ) = @_;
+
+	my $ret = eval { decode_json $string; };
+
+	if( $ret and ref $ret ) { return $ret; }
+	else {
+		die "Bad response: $string\n";
+	}
 }
