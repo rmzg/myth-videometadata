@@ -66,6 +66,7 @@ for my $top_dir ( @ARGV ) {
 
 	while( defined( my $series_dir = readdir $dh ) ) {
 		next if $series_dir =~ /^\./;
+		next unless -d "$top_dir/$series_dir";
 
 		print "Found [$series_dir]\n";
 
@@ -551,4 +552,26 @@ sub store_folder_image {
 	my( $abs_dir, $series ) = @_;
 
 	my @banners = grep { $_->BannerType eq 'poster' } @{$series->banners};
+	if( not @banners ) { @banners = @{$series->banners} } #TODO Prefer different banner types first.. heh
+
+	my( $best_banner ) = map { $_->BannerPath } sort { ( $b->Rating // 0 ) <=> ( $a->Rating // 0 ) } @banners;
+	
+	my( $ext ) = $best_banner =~ /\.(\w{2,4})$/;
+
+
+	my $abs_url = $tvdb_base_image_url . $best_banner;
+
+	my $resp = $ua->get( $abs_url );
+
+	if( $resp->is_success ) {
+		my $out_path = "$abs_dir/folder.$ext";
+
+		open my $fh, ">", $out_path or die "Failed to open [$out_path]: $!\n";
+		print $fh $resp->content;
+	}
+	else {
+		warn "Failed to fetch $abs_url: " . $resp->code . "\n";
+	}
+
+	return;
 }
