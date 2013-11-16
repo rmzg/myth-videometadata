@@ -1,0 +1,8 @@
+Add automatic image copying to moviescan and tvscan, right now they're stored in cache dirs
+Fix hardcoding tv/ and movie/ prefixes
+Fix hardcoding hostname in metadata
+Add metadata cleanup script that attempts to remove files that aren't there any more 
+	This script needs to also delete image files
+	Also it should probably prompt the user for each file it finds, or something.
+	
+
