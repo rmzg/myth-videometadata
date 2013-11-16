@@ -1,0 +1,14 @@
+moviescan.pl and tvscan.pl each contain some documentation at the top of each file which is more comprehensive.
+
+But in short:
+
+./moviescan.pl /path/to/movies
+./tvscan.pl /path/to/tv
+
+Both these scripts insert the appropriate metadata into the videometadata table for each movie/show found.
+MythTV wants relative path names for each file so the scripts assume you can reach each file name by prefixing it with movie/ or tv/, respectively.
+In other words if your directory is /mnt/harddrive/movies then you should ensure that mythtv can reach the 'movies' sub-directory by going to videostorage/movies
+I solved this with symlinking /mnt/foo/movies to /var/lib/mythtv/videos/movies, or you could reconfigure where mythtv looks for videos. Or fix the scripts.
+
+The scripts also generate a number of image files for each tv/movie file found, these are stored in moviescan_cache and tvscan_cach directories, with subdirectories corresponding to mythtv image file directories. You need to manually copy these into where ever mythtv is configured to look for them if you want pretty pictures when browsing.
+
