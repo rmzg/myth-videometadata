@@ -321,6 +321,7 @@ sub check_for_new_files {
 				while( readdir $sdh ) {
 					if( /\.$file_ext_regex$/ and -f "$new_abs_path/$_" ) {
 						if( not show_in_db( "tv/$series_dir/$sub_dir/$_" ) ) {
+							warn "File triggering dir scan [$series_dir] [$_]\n";
 							return 1;
 						}
 					}
@@ -333,6 +334,7 @@ sub check_for_new_files {
 		while( readdir $dh ) {
 			if( /\.$file_ext_regex$/ and -f "$abs_path/$_" ) {
 				if( not show_in_db( "tv/$series_dir/$_" ) ) {
+					warn "File triggering dir scan [$series_dir] [$_]\n";
 					return 1;
 				}
 			}
