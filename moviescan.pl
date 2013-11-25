@@ -138,7 +138,7 @@ sub find_movie_file {
 	opendir my $dh, $dir or die "Failed to open movie dir [$dir]: $!\n";
 
 	while( readdir $dh ) {
-		if( /\.($file_ext_regex)$/ ) {
+		if( /\.($file_ext_regex)$/ and not /sample/i ) {
 			return $_;
 		}
 	}
