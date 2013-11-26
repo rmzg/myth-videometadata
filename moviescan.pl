@@ -21,6 +21,7 @@ $|++; #Turn off STDOUT buffering
 # are not moved into the mythtv image directories since we don't know where they are.
 # So you need to manually copy the generated images into the right spots.
 
+my $hostname = `hostname`; chomp $hostname; #TODO Figure out correct setting!
 
 my $mdb = WWW::TheMovieDB->new({ 
 	key => '9f78a7651a6a613062eb03f95b13160f',
@@ -115,7 +116,7 @@ for my $top_dir ( @ARGV ) {
 			processed => 1, #TODO Uh.. what is this?
 			playcommand => undef,
 			category => 0, #TODO Assign a category
-			host => 'mediabox', #TODO Oh god we have to find the hostname now?
+			host => $hostname,
 
 			trailer => $trailers->{youtube}->[0]->{source},
 

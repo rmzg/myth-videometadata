@@ -45,6 +45,8 @@ $|++; #Turn off STDOUT buffering
 # are not moved into the mythtv image directories since we don't know where they are.
 # So you need to manually copy the generated images into the right spots.
 
+my $hostname = `hostname`; chomp $hostname; #TODO Figure out correct setting!
+
 my $tvdb = WebService::TVDB->new( api_key => 'BA564A54BE1EA624', language => 'English', max_retries => '10' );
 my $tvdb_base_image_url = "http://thetvdb.com/banners/"; # This is the root path for all image requests. It uses round-robin dns so we always use the same host.
 
@@ -192,7 +194,7 @@ for my $top_dir ( @ARGV ) {
 					playcommand => undef,
 					category => 0, #TODO Add categories!
 					trailer => '', #TV Shows don't have trailers, right?
-					host => 'mediabox', #TODO Figure out proper hostname!
+					host => $hostname, 
 
 					coverfile => get_coverfile( $series, $sn ),
 					screenshot => get_screenshot( $episode ),
@@ -251,7 +253,7 @@ for my $top_dir ( @ARGV ) {
 					playcommand => undef,
 					category => 0, #TODO Add categories!
 					trailer => '', #TV Shows don't have trailers, right?
-					host => 'mediabox', #TODO Figure out proper hostname!
+					host => $hostname,
 
 					coverfile => '',
 					screenshot => '',
