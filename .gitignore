@@ -1,5 +1,6 @@
 moviescan_cache
 tvscan_cache
 tmdb.pl
+ttdb.pl
 *.swp
 .*.swp

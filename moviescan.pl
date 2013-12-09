@@ -33,7 +33,7 @@ my $mdb = WWW::TheMovieDB->new({
 my $ua = LWP::UserAgent->new;
 my $dbh = DBI->connect( "dbi:mysql:mythconverg","mythtv","mythtv" ) or die $!;
 
-my @file_exts = qw/mkv avi mp4 mpg mpeg ts mov wmv divx flv rmvb mpe mpa mp2 m2a qt rm 3gp ogm bin dvr gom gvi h264 hdmov hdv hkm mp4v mpeg1 mpeg4 ogv ogx tivo wtv/;
+my @file_exts = qw/mkv avi mp4 mpg mpeg ts mov wmv divx flv rmvb mpe mpa mp2 m2a m2ts qt rm 3gp ogm bin dvr gom gvi h264 hdmov hdv hkm mp4v mpeg1 mpeg4 ogv ogx tivo wtv/;
 	my $file_ext_regex = join '|', @file_exts;
 
 #TODO Sometimes the service returns 503 xml based error strings instead of actual data

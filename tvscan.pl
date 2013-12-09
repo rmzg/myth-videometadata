@@ -133,8 +133,8 @@ for my $top_dir ( @ARGV ) {
 
 				# If we want dvd order..
 				if( lc($metadata->{series_order} // "") eq 'dvd' ) {
-					$sn = $episode->DVD_season;
-					$en = $episode->DVD_episodenumber;
+					$sn //= $episode->DVD_season;
+					$en //= $episode->DVD_episodenumber;
 					next unless length($sn) and length($en); #Skip specials that don't get proper numbers..
 
 					# DVD episodenumbers look like: 24.0, we want to ignore everything after the dot
@@ -282,8 +282,10 @@ sub find_file {
 		# Check for a number of different $sn/$en patterns
 		if( 
 			/\D0?$sn\D{1,3}0?$en(?=\D).*\.$file_ext_regex$/ 
+			or /Season\s*0?$sn\s*Episode\s*0?$en(?=\D).*\.$file_ext_regex$/i
+			or /^\s*0?$sn\.0?$en(?=\D).*\.$file_ext_regex$/
 			or /^\s*0?$en\s*\.$file_ext_regex$/ 
-			or /^\s*[eE]?0?$en(?=\D).*\.$file_ext_regex$/ 
+			or /^\s*[eE]?0?$en(?=\D\D).*\.$file_ext_regex$/ 
 		) {
 			# Ensure its actually a file...
 			if( -f "$dir/$_" ) {
