@@ -22,6 +22,7 @@ $|++; #Turn off STDOUT buffering
 # So you need to manually copy the generated images into the right spots.
 
 my $hostname = `hostname`; chomp $hostname; #TODO Figure out correct setting!
+my $myth_file_dir = "/var/lib/mythtv";
 
 my $base_output_dir = "/var/lib/mythtv/videos/movies";
 	mkdir $base_output_dir;
@@ -48,8 +49,8 @@ my $configuration = get_json $mdb->Configuration::configuration();
 
 #TODO Option parsing
 
-mkdir "moviescan_cache";
-chdir "moviescan_cache" or die $!;
+#mkdir "moviescan_cache";
+chdir $myth_file_dir or die $!;
 # A list of directories containing directories containing files.
 for my $top_dir ( @ARGV ) {
 	$top_dir =~ s{/+$}{};
@@ -130,7 +131,7 @@ for my $top_dir ( @ARGV ) {
 			screenshot =>  '',
 			banner => '',
 			fanart => get_art( $images, 'fanart', 'backdrops' ),
-			coverfile => get_art( $images, 'coverfile', 'posters' ),
+			coverfile => get_art( $images, 'coverart', 'posters' ),
 		};
 
 
