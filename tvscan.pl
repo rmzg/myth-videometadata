@@ -281,7 +281,7 @@ sub find_file {
 
 		# Check for a number of different $sn/$en patterns
 		if( 
-			/\D0?$sn\D{1,3}0?$en(?=\D).*\.$file_ext_regex$/ 
+			/\D0?(?<!DD)$sn\D{1,3}0?$en(?=\D).*\.$file_ext_regex$/ #Added (<!DD) to avoid matching DD5.1 sound specifiers.
 			or /Season\s*0?$sn\s*Episode\s*0?$en(?=\D).*\.$file_ext_regex$/i
 			or /^\s*0?$sn\.0?$en(?=\D).*\.$file_ext_regex$/
 			or /^\s*0?$en\s*\.$file_ext_regex$/ 
