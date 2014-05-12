@@ -7,6 +7,7 @@ require 5.11.2; #readdir!
 
 use WWW::TheMovieDB;
 use JSON qw/decode_json/;
+use URI::Escape qw/uri_escape/;
 use DBI;
 use Time::HiRes qw/sleep/;
 $|++; #Turn off STDOUT buffering
@@ -37,6 +38,8 @@ my $mdb = WWW::TheMovieDB->new({
 
 my $ua = LWP::UserAgent->new;
 my $dbh = DBI->connect( "dbi:mysql:mythconverg","mythtv","mythtv" ) or die $!;
+
+verify_symlinks_exist();
 
 my @file_exts = qw/mkv avi mp4 mpg mpeg ts mov wmv divx flv rmvb mpe mpa mp2 m2a m2ts qt rm 3gp ogm bin dvr gom gvi h264 hdmov hdv hkm mp4v mpeg1 mpeg4 ogv ogx tivo wtv/;
 	my $file_ext_regex = join '|', @file_exts;
@@ -80,7 +83,7 @@ for my $top_dir ( @ARGV ) {
 			next;
 		}
 
-		my $search = get_json $mdb->Search::movie({ query => $title, language => 'en', year => $year, search_type => 'phrase' });
+		my $search = get_json $mdb->Search::movie({ query => uri_escape($title), language => 'en', year => $year, search_type => 'phrase' });
 		if( $search->{total_results} < 1 ) {
 			warn "Failed to find a match for [$title]!\n";
 			next;
@@ -159,9 +162,13 @@ sub mk_link {
 
 	mkdir "$base_output_dir/$sub_path";
 
-	print "Linking $path to $sub_path/$name\n";
+	my $link = "$base_output_dir/$sub_path/$name";
 
-	if( system( "ln", "-s", $path, "$base_output_dir/$sub_path/$name" ) != 0 ) {
+	print "Linking $path to $link\n";
+
+	unlink $link; # In some corner cases we have an already existing but probably bad link.
+
+	if( system( "ln", "-s", $path, $link ) != 0 ) {
 		warn "Failed to link!: [$?]: $!\n";
 		return 0;
 	}
@@ -365,5 +372,20 @@ sub get_json {
 	if( $ret and ref $ret ) { return $ret; }
 	else {
 		die "Bad response: $string\n";
+	}
+}
+
+sub verify_symlinks_exist {
+	my $rows = $dbh->selectall_arrayref("SELECT * FROM videometadata where filename like 'movies/%'",{Slice=>{}});
+
+	my $delete_sth = $dbh->prepare("DELETE FROM videometadata WHERE intid = ?");
+
+	for( @$rows ) {
+		my $link = "$myth_file_dir/videos/$_->{filename}";
+		if( not -e readlink $link ) {
+			print "Removing bad link $link\n";
+			unlink $link;
+			$delete_sth->execute( $_->{intid} );
+		}
 	}
 }
