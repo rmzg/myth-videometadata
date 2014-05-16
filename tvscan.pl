@@ -309,9 +309,8 @@ sub check_for_new_files {
 
 	opendir my $dh, $abs_path or die "Failed to open [$abs_path] for reading: $!\n";
 
-	# If there exists season sub dirs
-	# We assume we'll always have a s1 if there are any seasons dirs...
-	if( -d "$abs_path/S1" or -d "$abs_path/s1" ) {
+	# Check for season dirs so we can recurse into them.
+	if( glob "$abs_path/[sS]*" ) {
 		while( readdir $dh ) {
 
 			# Check if we found a season sub-dir..
